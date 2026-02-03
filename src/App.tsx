@@ -1,15 +1,15 @@
-// import React from 'react';
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// import Navbar from './components/Navbar';
-// import Home from './pages/Home';
-// import Catalog from './pages/Catalog';
-// import Cart from './pages/Cart';
-// import Login from './pages/Login';
-// import Signup from './pages/Signup';
-// import BloodBank from './pages/BloodBank';
-// import Orders from './pages/Orders';
-// import Chatbot from './components/Chatbot';
-// import './App.css';
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Catalog from './pages/Catalog';
+import Cart from './pages/Cart';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import BloodBank from './pages/BloodBank';
+import Orders from './pages/Orders';
+import Chatbot from './components/Chatbot';
+import './App.css';
 
 function App() {
   return (
