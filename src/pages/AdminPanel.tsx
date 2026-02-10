@@ -12,6 +12,8 @@ interface User {
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showRoleModal, setShowRoleModal] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
   
   // Load users from localStorage or use default
   const loadUsers = (): User[] => {
@@ -88,6 +90,39 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="admin-panel">
+      {showRoleModal && (
+        <div className="role-modal">
+          <div className="role-modal-content">
+            <h2>Select Your Role</h2>
+            <p>Please select how you want to access the system</p>
+            <div className="role-buttons">
+              <button 
+                className="role-btn admin-btn" 
+                onClick={() => {
+                  setUserRole('admin');
+                  setShowRoleModal(false);
+                }}
+              >
+                <span className="role-icon">👨‍💼</span>
+                <span className="role-title">Admin</span>
+                <span className="role-desc">Full access to manage system</span>
+              </button>
+              <button 
+                className="role-btn user-btn" 
+                onClick={() => {
+                  setUserRole('user');
+                  setShowRoleModal(false);
+                }}
+              >
+                <span className="role-icon">👤</span>
+                <span className="role-title">User</span>
+                <span className="role-desc">View and limited access</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="admin-sidebar">
         <h2>Admin Panel</h2>
         <nav className="admin-nav">
