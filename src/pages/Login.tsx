@@ -5,7 +5,8 @@ import './Login.css';
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    role: 'user'
   });
 
   const navigate = useNavigate();
@@ -39,6 +40,20 @@ const Login: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="role">Login As</label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                required
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
               <input
