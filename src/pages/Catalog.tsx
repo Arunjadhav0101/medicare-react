@@ -58,7 +58,24 @@ const Catalog: React.FC = () => {
         description: 'Diabetes medication',
         category: 'Diabetes',
         stock: 40
-      }
+      },
+      {
+        id: 7,
+        name: 'Insulin',
+        price: 200,
+        description: 'Insulin for diabetes management',
+        category: 'Diabetes',
+        stock: 30
+      },
+      {
+        id: 8,
+        name: 'dexamethasone',
+        price: 200,
+        description: 'Anti-inflammatory steroid medication',
+        category: 'Steroids',
+        stock: 30
+      },
+        
     ];
     setMedicines(mockMedicines);
   }, []);
