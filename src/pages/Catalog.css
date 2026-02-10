@@ -18,6 +18,39 @@
 .catalog-header p {
   color: #666;
   font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.catalog-header .btn {
+  margin-top: 10px;
+}
+
+.add-medicine-form {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.add-medicine-form h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.add-medicine-form input {
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.add-medicine-form input:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .catalog-filters {
@@ -118,6 +151,14 @@
 .medicine-actions .btn {
   width: 100%;
   justify-content: center;
+}
+
+.medicine-actions .btn-danger {
+  background: #dc3545;
+}
+
+.medicine-actions .btn-danger:hover {
+  background: #c82333;
 }
 
 .cart-quantity {
