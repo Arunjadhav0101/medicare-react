@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Medicine, User, Order, BloodDonor, BloodRequest } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -30,11 +30,13 @@ export const medicineAPI = {
 // User API
 export const userAPI = {
   login: (email: string, password: string) => 
-    api.post<{ user: User; token: string }>('/auth/login', { email, password }),
+    api.post<{ user: User; token: string }>('/users/login', { email, password }),
   register: (userData: Omit<User, 'id'> & { password: string }) => 
-    api.post<{ user: User; token: string }>('/auth/register', userData),
-  getProfile: () => api.get<User>('/auth/profile'),
-  updateProfile: (userData: Partial<User>) => api.put<User>('/auth/profile', userData),
+    api.post<{ user: User; token: string }>('/users/register', userData),
+  getAll: () => api.get<User[]>('/users'),
+  getProfile: () => api.get<User>('/users/profile'),
+  updateProfile: (id: string, userData: Partial<User>) => api.put<User>(`/users/${id}`, userData),
+  deleteUser: (id: string) => api.delete(`/users/${id}`),
 };
 
 // Cart API
