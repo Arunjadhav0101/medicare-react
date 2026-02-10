@@ -21,10 +21,14 @@ const Login: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // TEMP login logic
     if (formData.email && formData.password) {
       console.log('Login success:', formData);
-      navigate('/'); // redirect after login
+      
+      if (formData.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } else {
       alert('Please enter email and password');
     }

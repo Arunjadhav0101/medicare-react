@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Signup: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,8 +26,14 @@ const Signup: React.FC = () => {
       alert('Passwords do not match');
       return;
     }
-    // Handle signup logic here
+    
     console.log('Signup attempt:', formData);
+    
+    if (formData.role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/');
+    }
   };
 
   return (

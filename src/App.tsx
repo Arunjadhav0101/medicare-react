@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import BloodBank from './pages/BloodBank';
 import Orders from './pages/Orders';
+import AdminPanel from './pages/AdminPanel';
 import Chatbot from './components/Chatbot';
 import './App.css';
 
@@ -24,6 +25,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/blood-bank" element={<BloodBank />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
         <Chatbot />
       </div>
