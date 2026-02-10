@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const Medicine = require('../models/Medicine');
+const db = require('../config/database');
 
 // Get all medicines
 router.get('/', async (req, res) => {
   try {
-    const medicines = await Medicine.find();
+    const [medicines] = await db.query('SELECT * FROM medicines');
     res.json(medicines);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,9 +15,12 @@ router.get('/', async (req, res) => {
 // Add medicine
 router.post('/', async (req, res) => {
   try {
-    const medicine = new Medicine(req.body);
-    await medicine.save();
-    res.status(201).json(medicine);
+    const { name, price, description, category, stock } = req.body;
+    const [result] = await db.query(
+      'INSERT INTO medicines (name, price, description, category, stock) VALUES (?, ?, ?, ?, ?)',
+      [name, price, description, category, stock]
+    );
+    res.status(201).json({ id: result.insertId, ...req.body });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -26,8 +29,12 @@ router.post('/', async (req, res) => {
 // Update medicine
 router.put('/:id', async (req, res) => {
   try {
-    const medicine = await Medicine.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(medicine);
+    const { name, price, description, category, stock } = req.body;
+    await db.query(
+      'UPDATE medicines SET name = ?, price = ?, description = ?, category = ?, stock = ? WHERE id = ?',
+      [name, price, description, category, stock, req.params.id]
+    );
+    res.json({ message: 'Medicine updated successfully' });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -36,7 +43,7 @@ router.put('/:id', async (req, res) => {
 // Delete medicine
 router.delete('/:id', async (req, res) => {
   try {
-    await Medicine.findByIdAndDelete(req.params.id);
+    await db.query('DELETE FROM medicines WHERE id = ?', [req.params.id]);
     res.json({ message: 'Medicine deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

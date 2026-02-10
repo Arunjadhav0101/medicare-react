@@ -2,34 +2,46 @@
 
 ## Setup Instructions
 
-### 1. Install MongoDB
+### 1. Install MySQL
 ```bash
 # For Ubuntu/Debian
-sudo apt-get install mongodb
+sudo apt-get install mysql-server
 
 # For macOS
-brew install mongodb-community
+brew install mysql
 
-# Start MongoDB
-sudo systemctl start mongodb  # Linux
-brew services start mongodb-community  # macOS
+# Start MySQL
+sudo systemctl start mysql  # Linux
+brew services start mysql  # macOS
 ```
 
-### 2. Install Dependencies
+### 2. Create Database
+```bash
+# Login to MySQL
+mysql -u root -p
+
+# Run the schema file
+mysql -u root -p < backend/src/config/schema.sql
+```
+
+### 3. Install Dependencies
 ```bash
 cd backend
 npm install
 ```
 
-### 3. Configure Environment
+### 4. Configure Environment
 Edit `backend/.env` file:
 ```
-MONGODB_URI=mongodb://localhost:27017/medicare
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=medicare
 PORT=5000
 JWT_SECRET=your_jwt_secret_key_here
 ```
 
-### 4. Start the Server
+### 5. Start the Server
 ```bash
 # Development mode
 npm run dev
@@ -37,6 +49,14 @@ npm run dev
 # Production mode
 npm start
 ```
+
+## Database Schema
+
+### Tables:
+- **users** - id, name, email, phone, password, role, status
+- **medicines** - id, name, price, description, category, stock
+- **orders** - id, user_id, total_amount, status
+- **order_items** - id, order_id, medicine_id, quantity, price
 
 ## API Endpoints
 
@@ -57,10 +77,3 @@ npm start
 - `GET /api/orders` - Get all orders
 - `POST /api/orders` - Create new order
 - `PUT /api/orders/:id` - Update order status
-
-## Frontend Integration
-
-Update `src/services/api.ts` to use these endpoints:
-```typescript
-const API_URL = 'http://localhost:5000/api';
-```
