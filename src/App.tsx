@@ -9,6 +9,7 @@ import Signup from './pages/Signup';
 import BloodBank from './pages/BloodBank';
 import Orders from './pages/Orders';
 import AdminPanel from './pages/AdminPanel';
+import UserDashboard from './pages/UserDashboard';
 import Chatbot from './components/Chatbot';
 import './App.css';
 
@@ -26,6 +27,7 @@ function App() {
           <Route path="/blood-bank" element={<BloodBank />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/user-dashboard" element={<UserDashboard />} />
         </Routes>
         <Chatbot />
       </div>

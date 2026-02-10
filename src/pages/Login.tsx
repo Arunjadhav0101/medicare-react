@@ -27,7 +27,7 @@ const Login: React.FC = () => {
       if (formData.role === 'admin') {
         navigate('/admin');
       } else {
-        navigate('/');
+        navigate('/user-dashboard');
       }
     } else {
       alert('Please enter email and password');

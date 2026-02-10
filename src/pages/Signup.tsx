@@ -45,7 +45,7 @@ const Signup: React.FC = () => {
     if (formData.role === 'admin') {
       navigate('/admin');
     } else {
-      navigate('/');
+      navigate('/user-dashboard');
     }
   };
 
