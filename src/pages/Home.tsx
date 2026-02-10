@@ -1,13 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
+import medicareBg from "../assests/medicare.png";
+
 
 const Home: React.FC = () => {
   return (
     <div className="home">
-      <section className="hero">
+      <section className="hero"  style={{
+     backgroundImage: `url(${medicareBg})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  }}>
         <div className="container hero-container">
           <div className="hero-content">
+            
             <h1 className="hero-title">Your Health, Our Priority</h1>
             <p className="hero-subtitle">
               AI-powered online pharmacy with smart medicine recommendations and prescription management

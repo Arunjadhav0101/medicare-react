@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Login: React.FC = () => {
@@ -7,6 +7,8 @@ const Login: React.FC = () => {
     email: '',
     password: ''
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -17,8 +19,14 @@ const Login: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt:', formData);
+
+    // TEMP login logic
+    if (formData.email && formData.password) {
+      console.log('Login success:', formData);
+      navigate('/'); // redirect after login
+    } else {
+      alert('Please enter email and password');
+    }
   };
 
   return (
@@ -29,7 +37,7 @@ const Login: React.FC = () => {
             <h2>Welcome Back</h2>
             <p>Sign in to your MediCare account</p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
@@ -42,7 +50,7 @@ const Login: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <input
@@ -54,12 +62,12 @@ const Login: React.FC = () => {
                 required
               />
             </div>
-            
+
             <button type="submit" className="btn btn-primary auth-btn">
               Sign In
             </button>
           </form>
-          
+
           <div className="auth-footer">
             <p>Don't have an account? <Link to="/signup">Sign up here</Link></p>
           </div>
