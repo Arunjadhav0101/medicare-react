@@ -3,9 +3,17 @@ import './AdminPanel.css';
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [users, setUsers] = useState([
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'User', status: 'Active' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
+    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'Admin', status: 'Active' }
+  ]);
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'User', status: 'Active' });
 
   const stats = {
-    totalUsers: 1250,
+    totalUsers: users.length,
     totalOrders: 3420,
     totalRevenue: 125000,
     pendingOrders: 45
@@ -15,12 +23,6 @@ const AdminPanel: React.FC = () => {
     { id: 'ORD001', user: 'John Doe', amount: 450, status: 'Pending', date: '2026-02-10' },
     { id: 'ORD002', user: 'Jane Smith', amount: 320, status: 'Completed', date: '2026-02-10' },
     { id: 'ORD003', user: 'Mike Johnson', amount: 680, status: 'Processing', date: '2026-02-09' }
-  ];
-
-  const users = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'User', status: 'Active' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'Admin', status: 'Active' }
   ];
 
   const products = [
@@ -33,6 +35,31 @@ const AdminPanel: React.FC = () => {
     { id: 1, patient: 'Sarah Wilson', bloodType: 'O+', units: 2, status: 'Urgent', date: '2026-02-10' },
     { id: 2, patient: 'Tom Brown', bloodType: 'A-', units: 1, status: 'Pending', date: '2026-02-09' }
   ];
+
+  const handleAddUser = () => {
+    if (newUser.name && newUser.email) {
+      setUsers([...users, { ...newUser, id: users.length + 1 }]);
+      setNewUser({ name: '', email: '', role: 'User', status: 'Active' });
+      setShowAddUser(false);
+    }
+  };
+
+  const handleDeleteUser = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      setUsers(users.filter(user => user.id !== id));
+    }
+  };
+
+  const handleEditUser = (user: any) => {
+    setEditingUser({ ...user });
+  };
+
+  const handleUpdateUser = () => {
+    if (editingUser) {
+      setUsers(users.map(user => user.id === editingUser.id ? editingUser : user));
+      setEditingUser(null);
+    }
+  };
 
   return (
     <div className="admin-panel">
@@ -113,7 +140,59 @@ const AdminPanel: React.FC = () => {
         {activeTab === 'users' && (
           <div className="users-section">
             <h1>User Management</h1>
-            <button className="btn btn-primary">Add New User</button>
+            <button className="btn btn-primary" onClick={() => setShowAddUser(!showAddUser)}>
+              {showAddUser ? 'Cancel' : 'Add New User'}
+            </button>
+
+            {showAddUser && (
+              <div className="add-user-form">
+                <h3>Add New User</h3>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={newUser.name}
+                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                />
+                <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>
+                  <option value="User">User</option>
+                  <option value="Admin">Admin</option>
+                </select>
+                <button className="btn btn-primary" onClick={handleAddUser}>Save User</button>
+              </div>
+            )}
+
+            {editingUser && (
+              <div className="edit-user-modal">
+                <div className="modal-content">
+                  <h3>Edit User</h3>
+                  <input
+                    type="text"
+                    value={editingUser.name}
+                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                  />
+                  <input
+                    type="email"
+                    value={editingUser.email}
+                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  />
+                  <select value={editingUser.role} onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}>
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                  <div className="modal-actions">
+                    <button className="btn btn-primary" onClick={handleUpdateUser}>Update</button>
+                    <button className="btn-small" onClick={() => setEditingUser(null)}>Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <table>
               <thead>
                 <tr>
@@ -134,8 +213,8 @@ const AdminPanel: React.FC = () => {
                     <td>{user.role}</td>
                     <td><span className="status active">{user.status}</span></td>
                     <td>
-                      <button className="btn-small">Edit</button>
-                      <button className="btn-small btn-danger">Delete</button>
+                      <button className="btn-small" onClick={() => handleEditUser(user)}>Edit</button>
+                      <button className="btn-small btn-danger" onClick={() => handleDeleteUser(user.id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
