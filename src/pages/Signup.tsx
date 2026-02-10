@@ -29,6 +29,19 @@ const Signup: React.FC = () => {
     
     console.log('Signup attempt:', formData);
     
+    // Save user to localStorage
+    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    const newUser = {
+      id: existingUsers.length + 1,
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      role: formData.role === 'admin' ? 'Admin' : 'User',
+      status: 'Active'
+    };
+    existingUsers.push(newUser);
+    localStorage.setItem('users', JSON.stringify(existingUsers));
+    
     if (formData.role === 'admin') {
       navigate('/admin');
     } else {

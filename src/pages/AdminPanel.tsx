@@ -3,11 +3,21 @@ import './AdminPanel.css';
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [users, setUsers] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'User', status: 'Active' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
-    { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'Admin', status: 'Active' }
-  ]);
+  
+  // Load users from localStorage or use default
+  const loadUsers = () => {
+    const savedUsers = localStorage.getItem('users');
+    if (savedUsers) {
+      return JSON.parse(savedUsers);
+    }
+    return [
+      { id: 1, name: 'John Doe', email: 'john@example.com', role: 'User', status: 'Active' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
+      { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'Admin', status: 'Active' }
+    ];
+  };
+  
+  const [users, setUsers] = useState(loadUsers());
   const [showAddUser, setShowAddUser] = useState(false);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'User', status: 'Active' });
@@ -38,7 +48,9 @@ const AdminPanel: React.FC = () => {
 
   const handleAddUser = () => {
     if (newUser.name && newUser.email) {
-      setUsers([...users, { ...newUser, id: users.length + 1 }]);
+      const updatedUsers = [...users, { ...newUser, id: users.length + 1 }];
+      setUsers(updatedUsers);
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
       setNewUser({ name: '', email: '', role: 'User', status: 'Active' });
       setShowAddUser(false);
     }
@@ -46,7 +58,9 @@ const AdminPanel: React.FC = () => {
 
   const handleDeleteUser = (id: number) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(user => user.id !== id));
+      const updatedUsers = users.filter(user => user.id !== id);
+      setUsers(updatedUsers);
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
     }
   };
 
@@ -56,7 +70,9 @@ const AdminPanel: React.FC = () => {
 
   const handleUpdateUser = () => {
     if (editingUser) {
-      setUsers(users.map(user => user.id === editingUser.id ? editingUser : user));
+      const updatedUsers = users.map(user => user.id === editingUser.id ? editingUser : user);
+      setUsers(updatedUsers);
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
       setEditingUser(null);
     }
   };
