@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 import './AdminPanel.css';
 
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  phone?: string;
+}
+
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   
   // Load users from localStorage or use default
-  const loadUsers = () => {
+  const loadUsers = (): User[] => {
     const savedUsers = localStorage.getItem('users');
     if (savedUsers) {
       return JSON.parse(savedUsers);
@@ -17,9 +26,9 @@ const AdminPanel: React.FC = () => {
     ];
   };
   
-  const [users, setUsers] = useState(loadUsers());
+  const [users, setUsers] = useState<User[]>(loadUsers());
   const [showAddUser, setShowAddUser] = useState(false);
-  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'User', status: 'Active' });
 
   const stats = {
@@ -58,19 +67,19 @@ const AdminPanel: React.FC = () => {
 
   const handleDeleteUser = (id: number) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      const updatedUsers = users.filter(user => user.id !== id);
+      const updatedUsers = users.filter((user: User) => user.id !== id);
       setUsers(updatedUsers);
       localStorage.setItem('users', JSON.stringify(updatedUsers));
     }
   };
 
-  const handleEditUser = (user: any) => {
+  const handleEditUser = (user: User) => {
     setEditingUser({ ...user });
   };
 
   const handleUpdateUser = () => {
     if (editingUser) {
-      const updatedUsers = users.map(user => user.id === editingUser.id ? editingUser : user);
+      const updatedUsers = users.map((user: User) => user.id === editingUser.id ? editingUser : user);
       setUsers(updatedUsers);
       localStorage.setItem('users', JSON.stringify(updatedUsers));
       setEditingUser(null);
@@ -221,7 +230,7 @@ const AdminPanel: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map(user => (
+                {users.map((user: User) => (
                   <tr key={user.id}>
                     <td>{user.id}</td>
                     <td>{user.name}</td>
