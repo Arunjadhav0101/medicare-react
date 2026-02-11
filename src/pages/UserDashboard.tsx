@@ -140,7 +140,7 @@ const UserDashboard: React.FC = () => {
           </div>
         )}
 
-        
+        {activeTab === 'orders' && (
           <div className="orders-view">
             <h1>My Orders</h1>
             <table>
@@ -159,7 +159,11 @@ const UserDashboard: React.FC = () => {
                     <td>{order.id}</td>
                     <td>{order.items}</td>
                     <td>₹{order.amount}</td>
-                    <td><span className={`status ${order.status.toLowerCase()}`}>{order.status}</span></td>
+                    <td>
+                      <span className={`status ${order.status.toLowerCase()}`}>
+                        {order.status}
+                      </span>
+                    </td>
                     <td>{order.date}</td>
                   </tr>
                 ))}
@@ -167,6 +171,7 @@ const UserDashboard: React.FC = () => {
             </table>
           </div>
         )}
+
 
         {activeTab === 'profile' && (
           <div className="profile-view">
