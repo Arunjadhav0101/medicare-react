@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getMedicines, saveMedicines } from '../data/medicines';
 import './AdminPanel.css';
 
 interface User {
@@ -32,6 +33,15 @@ interface BloodRequest {
   hospital?: string;
   contactPhone?: string;
   urgency?: string;
+}
+
+interface Medicine {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+  stock: number;
 }
 
 const AdminPanel: React.FC = () => {
@@ -82,11 +92,13 @@ const AdminPanel: React.FC = () => {
     { id: 'ORD003', user: 'Vikram Singh', amount: 680, status: 'Processing', date: '2026-02-09' }
   ];
 
-  const products = [
-    { id: 1, name: 'Paracetamol', category: 'Medicine', price: 50, stock: 500 },
-    { id: 2, name: 'Bandage', category: 'First Aid', price: 30, stock: 200 },
-    { id: 3, name: 'Thermometer', category: 'Equipment', price: 150, stock: 100 }
-  ];
+  const [medicines, setMedicines] = useState<Medicine[]>(getMedicines());
+  const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null);
+  const [showAddMedicine, setShowAddMedicine] = useState(false);
+  const [newMedicine, setNewMedicine] = useState({ name: '', price: 0, description: '', category: '', stock: 0 });
+
+  const totalStock = medicines.reduce((sum, m) => sum + m.stock, 0);
+  const totalMedicines = medicines.length;
 
   const handleApproveDonor = (id: number) => {
     const updated = bloodDonors.map(d => d.id === id ? { ...d, status: 'Approved' } : d);
@@ -110,6 +122,41 @@ const AdminPanel: React.FC = () => {
     const updated = bloodRequests.map(r => r.id === id ? { ...r, status: 'Rejected' } : r);
     setBloodRequests(updated);
     localStorage.setItem('bloodRequests', JSON.stringify(updated));
+  };
+
+  const handleAddMedicine = () => {
+    if (newMedicine.name && newMedicine.price && newMedicine.category) {
+      const medicine: Medicine = {
+        id: Math.max(...medicines.map(m => m.id), 0) + 1,
+        ...newMedicine
+      };
+      const updated = [...medicines, medicine];
+      setMedicines(updated);
+      saveMedicines(updated);
+      setNewMedicine({ name: '', price: 0, description: '', category: '', stock: 0 });
+      setShowAddMedicine(false);
+    }
+  };
+
+  const handleDeleteMedicine = (id: number) => {
+    if (window.confirm('Are you sure you want to delete this medicine?')) {
+      const updated = medicines.filter(m => m.id !== id);
+      setMedicines(updated);
+      saveMedicines(updated);
+    }
+  };
+
+  const handleEditMedicine = (medicine: Medicine) => {
+    setEditingMedicine({ ...medicine });
+  };
+
+  const handleUpdateMedicine = () => {
+    if (editingMedicine) {
+      const updated = medicines.map(m => m.id === editingMedicine.id ? editingMedicine : m);
+      setMedicines(updated);
+      saveMedicines(updated);
+      setEditingMedicine(null);
+    }
   };
 
   const handleAddUser = () => {
@@ -181,12 +228,12 @@ const AdminPanel: React.FC = () => {
                 <p className="stat-number">{stats.totalUsers}</p>
               </div>
               <div className="stat-card">
-                <h3>Total Orders</h3>
-                <p className="stat-number">{stats.totalOrders}</p>
+                <h3>Total Medicines</h3>
+                <p className="stat-number">{totalMedicines}</p>
               </div>
               <div className="stat-card">
-                <h3>Revenue</h3>
-                <p className="stat-number">₹{stats.totalRevenue}</p>
+                <h3>Total Stock</h3>
+                <p className="stat-number">{totalStock}</p>
               </div>
               <div className="stat-card">
                 <h3>Pending Orders</h3>
@@ -350,8 +397,40 @@ const AdminPanel: React.FC = () => {
 
         {activeTab === 'products' && (
           <div className="products-section">
-            <h1>Product Management</h1>
-            <button className="btn btn-primary">Add New Product</button>
+            <h1>Medicine Management</h1>
+            <button className="btn btn-primary" onClick={() => setShowAddMedicine(!showAddMedicine)}>
+              {showAddMedicine ? 'Cancel' : 'Add New Medicine'}
+            </button>
+
+            {showAddMedicine && (
+              <div className="add-user-form">
+                <h3>Add New Medicine</h3>
+                <input type="text" placeholder="Name" value={newMedicine.name} onChange={(e) => setNewMedicine({ ...newMedicine, name: e.target.value })} />
+                <input type="number" placeholder="Price" value={newMedicine.price || ''} onChange={(e) => setNewMedicine({ ...newMedicine, price: Number(e.target.value) })} />
+                <input type="text" placeholder="Description" value={newMedicine.description} onChange={(e) => setNewMedicine({ ...newMedicine, description: e.target.value })} />
+                <input type="text" placeholder="Category" value={newMedicine.category} onChange={(e) => setNewMedicine({ ...newMedicine, category: e.target.value })} />
+                <input type="number" placeholder="Stock" value={newMedicine.stock || ''} onChange={(e) => setNewMedicine({ ...newMedicine, stock: Number(e.target.value) })} />
+                <button className="btn btn-primary" onClick={handleAddMedicine}>Save Medicine</button>
+              </div>
+            )}
+
+            {editingMedicine && (
+              <div className="edit-user-modal">
+                <div className="modal-content">
+                  <h3>Edit Medicine</h3>
+                  <input type="text" value={editingMedicine.name} onChange={(e) => setEditingMedicine({ ...editingMedicine, name: e.target.value })} />
+                  <input type="number" value={editingMedicine.price} onChange={(e) => setEditingMedicine({ ...editingMedicine, price: Number(e.target.value) })} />
+                  <input type="text" value={editingMedicine.description} onChange={(e) => setEditingMedicine({ ...editingMedicine, description: e.target.value })} />
+                  <input type="text" value={editingMedicine.category} onChange={(e) => setEditingMedicine({ ...editingMedicine, category: e.target.value })} />
+                  <input type="number" value={editingMedicine.stock} onChange={(e) => setEditingMedicine({ ...editingMedicine, stock: Number(e.target.value) })} />
+                  <div className="modal-actions">
+                    <button className="btn btn-primary" onClick={handleUpdateMedicine}>Update</button>
+                    <button className="btn-small" onClick={() => setEditingMedicine(null)}>Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <table>
               <thead>
                 <tr>
@@ -364,16 +443,16 @@ const AdminPanel: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map(product => (
-                  <tr key={product.id}>
-                    <td>{product.id}</td>
-                    <td>{product.name}</td>
-                    <td>{product.category}</td>
-                    <td>₹{product.price}</td>
-                    <td>{product.stock}</td>
+                {medicines.map(medicine => (
+                  <tr key={medicine.id}>
+                    <td>{medicine.id}</td>
+                    <td>{medicine.name}</td>
+                    <td>{medicine.category}</td>
+                    <td>₹{medicine.price}</td>
+                    <td>{medicine.stock}</td>
                     <td>
-                      <button className="btn-small">Edit</button>
-                      <button className="btn-small btn-danger">Delete</button>
+                      <button className="btn-small" onClick={() => handleEditMedicine(medicine)}>Edit</button>
+                      <button className="btn-small btn-danger" onClick={() => handleDeleteMedicine(medicine.id)}>Delete</button>
                     </td>
                   </tr>
                 ))}
