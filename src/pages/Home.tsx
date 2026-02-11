@@ -41,7 +41,6 @@ const Home: React.FC = () => {
               AI-powered online pharmacy with smart medicine recommendations and prescription management
             </p>
             <div className="hero-buttons">
-              <Link to="/catalog" className="btn btn-primary">Browse Medicines</Link>
               <Link to="/signup" className="btn btn-secondary">Get Started</Link>
             </div>
           </div>

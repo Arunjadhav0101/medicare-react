@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getMedicines, saveMedicines } from '../data/medicines';
 import './AdminPanel.css';
 
@@ -412,9 +413,12 @@ const AdminPanel: React.FC = () => {
         {activeTab === 'products' && (
           <div className="products-section">
             <h1>Medicine Management</h1>
-            <button className="btn btn-primary" onClick={() => setShowAddMedicine(!showAddMedicine)}>
-              {showAddMedicine ? 'Cancel' : 'Add New Medicine'}
-            </button>
+            <div className="products-actions">
+              <button className="btn btn-primary" onClick={() => setShowAddMedicine(!showAddMedicine)}>
+                {showAddMedicine ? 'Cancel' : 'Add New Medicine'}
+              </button>
+              <Link to="/catalog" className="btn btn-secondary">Browse Medicines</Link>
+            </div>
 
             {showAddMedicine && (
               <div className="add-user-form">
