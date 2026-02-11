@@ -9,6 +9,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' *");
+  next();
+});
+
 // Routes
 app.use('/api/users', require('./routes/users'));
 app.use('/api/medicines', require('./routes/medicines'));
