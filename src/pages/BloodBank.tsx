@@ -35,14 +35,43 @@ const BloodBank: React.FC = () => {
 
   const handleDonorSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Donor registration:', donorForm);
+    
+    // Save donor registration to localStorage
+    const existingDonors = JSON.parse(localStorage.getItem('bloodDonors') || '[]');
+    const newDonor = {
+      id: Date.now(),
+      ...donorForm,
+      registeredDate: new Date().toISOString().split('T')[0],
+      status: 'Pending'
+    };
+    existingDonors.push(newDonor);
+    localStorage.setItem('bloodDonors', JSON.stringify(existingDonors));
+    
     alert('Thank you for registering as a blood donor! We will contact you soon.');
+    setDonorForm({ name: '', email: '', phone: '', bloodGroup: '', age: '', weight: '' });
   };
 
   const handleRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Blood request:', requestForm);
+    
+    // Save blood request to localStorage
+    const existingRequests = JSON.parse(localStorage.getItem('bloodRequests') || '[]');
+    const newRequest = {
+      id: Date.now(),
+      patient: requestForm.patientName,
+      bloodType: requestForm.bloodGroup,
+      units: requestForm.unitsNeeded,
+      urgency: requestForm.urgency,
+      hospital: requestForm.hospital,
+      contactPhone: requestForm.contactPhone,
+      date: new Date().toISOString().split('T')[0],
+      status: requestForm.urgency === 'high' ? 'Urgent' : 'Pending'
+    };
+    existingRequests.push(newRequest);
+    localStorage.setItem('bloodRequests', JSON.stringify(existingRequests));
+    
     alert('Your blood request has been submitted. We will process it immediately.');
+    setRequestForm({ patientName: '', bloodGroup: '', unitsNeeded: '', urgency: 'medium', hospital: '', contactPhone: '' });
   };
 
   return (

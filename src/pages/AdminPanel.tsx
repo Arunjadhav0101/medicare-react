@@ -10,6 +10,30 @@ interface User {
   phone?: string;
 }
 
+interface BloodDonor {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  bloodGroup: string;
+  age: string;
+  weight: string;
+  registeredDate: string;
+  status: string;
+}
+
+interface BloodRequest {
+  id: number;
+  patient: string;
+  bloodType: string;
+  units: string | number;
+  status: string;
+  date: string;
+  hospital?: string;
+  contactPhone?: string;
+  urgency?: string;
+}
+
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   
@@ -20,9 +44,9 @@ const AdminPanel: React.FC = () => {
       return JSON.parse(savedUsers);
     }
     return [
-      { id: 1, name: 'John Doe', email: 'john@example.com', role: 'User', status: 'Active' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Active' },
-      { id: 3, name: 'Mike Johnson', email: 'mike@example.com', role: 'Admin', status: 'Active' }
+      { id: 1, name: 'Rahul Verma', email: 'rahul@example.com', role: 'User', status: 'Active' },
+      { id: 2, name: 'Anjali Desai', email: 'anjali@example.com', role: 'User', status: 'Active' },
+      { id: 3, name: 'Arjun Mehta', email: 'arjun@example.com', role: 'Admin', status: 'Active' }
     ];
   };
   
@@ -30,6 +54,20 @@ const AdminPanel: React.FC = () => {
   const [showAddUser, setShowAddUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'User', status: 'Active' });
+
+  // Load blood donors and requests from localStorage
+  const [bloodDonors, setBloodDonors] = useState<BloodDonor[]>(() => {
+    const saved = localStorage.getItem('bloodDonors');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [bloodRequests, setBloodRequests] = useState<BloodRequest[]>(() => {
+    const saved = localStorage.getItem('bloodRequests');
+    return saved ? JSON.parse(saved) : [
+      { id: 1, patient: 'Priya Sharma', bloodType: 'O+', units: 2, status: 'Urgent', date: '2026-02-10' },
+      { id: 2, patient: 'Rajesh Kumar', bloodType: 'A-', units: 1, status: 'Pending', date: '2026-02-09' }
+    ];
+  });
 
   const stats = {
     totalUsers: users.length,
@@ -39,9 +77,9 @@ const AdminPanel: React.FC = () => {
   };
 
   const recentOrders = [
-    { id: 'ORD001', user: 'John Doe', amount: 450, status: 'Pending', date: '2026-02-10' },
-    { id: 'ORD002', user: 'Jane Smith', amount: 320, status: 'Completed', date: '2026-02-10' },
-    { id: 'ORD003', user: 'Mike Johnson', amount: 680, status: 'Processing', date: '2026-02-09' }
+    { id: 'ORD001', user: 'Amit Patel', amount: 450, status: 'Pending', date: '2026-02-10' },
+    { id: 'ORD002', user: 'Sneha Reddy', amount: 320, status: 'Completed', date: '2026-02-10' },
+    { id: 'ORD003', user: 'Vikram Singh', amount: 680, status: 'Processing', date: '2026-02-09' }
   ];
 
   const products = [
@@ -54,6 +92,30 @@ const AdminPanel: React.FC = () => {
     { id: 1, patient: 'Sarah Wilson', bloodType: 'O+', units: 2, status: 'Urgent', date: '2026-02-10' },
     { id: 2, patient: 'Tom Brown', bloodType: 'A-', units: 1, status: 'Pending', date: '2026-02-09' }
   ];
+
+  const handleApproveDonor = (id: number) => {
+    const updated = bloodDonors.map(d => d.id === id ? { ...d, status: 'Approved' } : d);
+    setBloodDonors(updated);
+    localStorage.setItem('bloodDonors', JSON.stringify(updated));
+  };
+
+  const handleRejectDonor = (id: number) => {
+    const updated = bloodDonors.map(d => d.id === id ? { ...d, status: 'Rejected' } : d);
+    setBloodDonors(updated);
+    localStorage.setItem('bloodDonors', JSON.stringify(updated));
+  };
+
+  const handleApproveRequest = (id: number) => {
+    const updated = bloodRequests.map(r => r.id === id ? { ...r, status: 'Approved' } : r);
+    setBloodRequests(updated);
+    localStorage.setItem('bloodRequests', JSON.stringify(updated));
+  };
+
+  const handleRejectRequest = (id: number) => {
+    const updated = bloodRequests.map(r => r.id === id ? { ...r, status: 'Rejected' } : r);
+    setBloodRequests(updated);
+    localStorage.setItem('bloodRequests', JSON.stringify(updated));
+  };
 
   const handleAddUser = () => {
     if (newUser.name && newUser.email) {
@@ -346,6 +408,50 @@ const AdminPanel: React.FC = () => {
                 <p>15 Units</p>
               </div>
             </div>
+
+            <h2>Blood Donor Registrations</h2>
+            {bloodDonors.length > 0 ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Blood Group</th>
+                    <th>Age</th>
+                    <th>Weight (kg)</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bloodDonors.map(donor => (
+                    <tr key={donor.id}>
+                      <td>{donor.name}</td>
+                      <td>{donor.email}</td>
+                      <td>{donor.phone}</td>
+                      <td>{donor.bloodGroup}</td>
+                      <td>{donor.age}</td>
+                      <td>{donor.weight}</td>
+                      <td>{donor.registeredDate}</td>
+                      <td><span className={`status ${donor.status.toLowerCase()}`}>{donor.status}</span></td>
+                      <td>
+                        {donor.status === 'Pending' && (
+                          <>
+                            <button className="btn-small" onClick={() => handleApproveDonor(donor.id)}>Approve</button>
+                            <button className="btn-small btn-danger" onClick={() => handleRejectDonor(donor.id)}>Reject</button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p>No blood donor registrations yet.</p>
+            )}
+
             <h2>Blood Requests</h2>
             <table>
               <thead>
@@ -369,8 +475,12 @@ const AdminPanel: React.FC = () => {
                     <td><span className={`status ${request.status.toLowerCase()}`}>{request.status}</span></td>
                     <td>{request.date}</td>
                     <td>
-                      <button className="btn-small">Approve</button>
-                      <button className="btn-small btn-danger">Reject</button>
+                      {(request.status === 'Pending' || request.status === 'Urgent') && (
+                        <>
+                          <button className="btn-small" onClick={() => handleApproveRequest(request.id)}>Approve</button>
+                          <button className="btn-small btn-danger" onClick={() => handleRejectRequest(request.id)}>Reject</button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
