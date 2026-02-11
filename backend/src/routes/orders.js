@@ -8,9 +8,9 @@ router.get('/', async (req, res) => {
     const [orders] = await db.query(`
       SELECT o.*, u.name as user_name, u.email as user_email 
       FROM orders o 
-      JOIN users u ON o.user_id = u.id
+      LEFT JOIN users u ON o.user_id = u.id
     `);
-    res.json(orders);
+    res.json(orders || []);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
