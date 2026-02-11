@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: medicare-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: medicare
+      MYSQL_USER: medicare_user
+      MYSQL_PASSWORD: medicare_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/src/config/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - medicare-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+networks:
+  medicare-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
