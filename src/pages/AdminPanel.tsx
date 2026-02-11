@@ -88,11 +88,6 @@ const AdminPanel: React.FC = () => {
     { id: 3, name: 'Thermometer', category: 'Equipment', price: 150, stock: 100 }
   ];
 
-  const bloodRequests = [
-    { id: 1, patient: 'Sarah Wilson', bloodType: 'O+', units: 2, status: 'Urgent', date: '2026-02-10' },
-    { id: 2, patient: 'Tom Brown', bloodType: 'A-', units: 1, status: 'Pending', date: '2026-02-09' }
-  ];
-
   const handleApproveDonor = (id: number) => {
     const updated = bloodDonors.map(d => d.id === id ? { ...d, status: 'Approved' } : d);
     setBloodDonors(updated);
