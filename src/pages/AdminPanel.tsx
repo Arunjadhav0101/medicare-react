@@ -97,6 +97,15 @@ const AdminPanel: React.FC = () => {
   const [showAddMedicine, setShowAddMedicine] = useState(false);
   const [newMedicine, setNewMedicine] = useState({ name: '', price: 0, description: '', category: '', stock: 0 });
 
+  const [contactInfo, setContactInfo] = useState(() => {
+    const saved = localStorage.getItem('contactInfo');
+    return saved ? JSON.parse(saved) : {
+      phone: '+91 9876543210',
+      email: 'support@medicare.com',
+      address: 'Mumbai, Maharashtra, India'
+    };
+  });
+
   const totalStock = medicines.reduce((sum, m) => sum + m.stock, 0);
   const totalMedicines = medicines.length;
 
@@ -157,6 +166,11 @@ const AdminPanel: React.FC = () => {
       saveMedicines(updated);
       setEditingMedicine(null);
     }
+  };
+
+  const handleSaveContactInfo = () => {
+    localStorage.setItem('contactInfo', JSON.stringify(contactInfo));
+    alert('Contact information updated successfully!');
   };
 
   const handleAddUser = () => {
@@ -567,23 +581,32 @@ const AdminPanel: React.FC = () => {
           <div className="settings-section">
             <h1>Settings</h1>
             <div className="settings-form">
+              <h2>Contact Information</h2>
               <div className="form-group">
-                <label>Site Name</label>
-                <input type="text" defaultValue="MediCare" />
+                <label>Contact Phone</label>
+                <input 
+                  type="tel" 
+                  value={contactInfo.phone} 
+                  onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                />
               </div>
               <div className="form-group">
-                <label>Admin Email</label>
-                <input type="email" defaultValue="admin@medicare.com" />
+                <label>Contact Email</label>
+                <input 
+                  type="email" 
+                  value={contactInfo.email}
+                  onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+                />
               </div>
               <div className="form-group">
-                <label>Contact Number</label>
-                <input type="tel" defaultValue="+91 1234567890" />
+                <label>Address</label>
+                <input 
+                  type="text" 
+                  value={contactInfo.address}
+                  onChange={(e) => setContactInfo({ ...contactInfo, address: e.target.value })}
+                />
               </div>
-              <div className="form-group">
-                <label>Enable Notifications</label>
-                <input type="checkbox" defaultChecked />
-              </div>
-              <button className="btn btn-primary">Save Settings</button>
+              <button className="btn btn-primary" onClick={handleSaveContactInfo}>Save Contact Info</button>
             </div>
           </div>
         )}

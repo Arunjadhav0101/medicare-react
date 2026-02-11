@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 import medicareBg from "../assests/medicare.png";
 
+interface ContactInfo {
+  phone: string;
+  email: string;
+  address: string;
+}
 
 const Home: React.FC = () => {
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    phone: '+91 9876543210',
+    email: 'support@medicare.com',
+    address: 'Mumbai, Maharashtra, India'
+  });
+
+  useEffect(() => {
+    const saved = localStorage.getItem('contactInfo');
+    if (saved) {
+      setContactInfo(JSON.parse(saved));
+    }
+  }, []);
   return (
     <div className="home">
       <section className="hero"  style={{
@@ -67,6 +84,29 @@ const Home: React.FC = () => {
               <div className="feature-icon">🤖</div>
               <h3>AI Chatbot</h3>
               <p>Intelligent assistant for medicine ordering and queries</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="contact-section">
+        <div className="container">
+          <h2>Contact Us</h2>
+          <div className="contact-grid">
+            <div className="contact-card">
+              <div className="contact-icon">📞</div>
+              <h3>Phone</h3>
+              <p>{contactInfo.phone}</p>
+            </div>
+            <div className="contact-card">
+              <div className="contact-icon">📧</div>
+              <h3>Email</h3>
+              <p>{contactInfo.email}</p>
+            </div>
+            <div className="contact-card">
+              <div className="contact-icon">📍</div>
+              <h3>Address</h3>
+              <p>{contactInfo.address}</p>
             </div>
           </div>
         </div>
