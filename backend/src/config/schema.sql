@@ -56,3 +56,27 @@ INSERT INTO medicines (name, price, description, category, stock) VALUES
 ('Omeprazole', 80.00, 'Acid reflux and heartburn relief', 'Digestive', 60),
 ('Aspirin', 30.00, 'Pain relief and blood thinner', 'Pain Relief', 90),
 ('Metformin', 150.00, 'Diabetes medication', 'Diabetes', 40);
+
+-- Insert sample users
+INSERT INTO users (name, email, password, role, status) VALUES
+('John Doe', 'john@example.com', 'hashed_password_123', 'User', 'Active'),
+('Jane Smith', 'jane@example.com', 'hashed_password_456', 'User', 'Active'),
+('Admin User', 'admin@example.com', 'hashed_admin_password', 'Admin', 'Active'),
+('Michael Johnson', 'michael@example.com', 'hashed_password_789', 'User', 'Active'),
+('Sarah Williams', 'sarah@example.com', 'hashed_password_321', 'User', 'Active');
+
+-- Insert sample orders
+INSERT INTO orders (user_id, total_amount, status) VALUES
+(1, 170.00, 'Completed'),
+(1, 120.00, 'Pending'),
+(2, 95.00, 'Completed'),
+(4, 250.00, 'Processing');
+
+-- Insert sample order items
+INSERT INTO order_items (order_id, medicine_id, quantity, price) VALUES
+(1, 1, 2, 25.00),
+(1, 3, 2, 45.00),
+(2, 2, 1, 120.00),
+(3, 4, 1, 80.00),
+(3, 5, 1, 30.00),
+(4, 6, 2, 150.00);
