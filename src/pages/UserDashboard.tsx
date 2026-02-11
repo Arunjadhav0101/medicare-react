@@ -39,14 +39,14 @@ const UserDashboard: React.FC = () => {
           <button className={activeTab === 'overview' ? 'active' : ''} onClick={() => setActiveTab('overview')}>
             Overview
           </button>
+          <button className={activeTab === 'medicines' ? 'active' : ''} onClick={() => setActiveTab('medicines')}>
+            Book Medicines
+          </button>
           <button className={activeTab === 'orders' ? 'active' : ''} onClick={() => setActiveTab('orders')}>
             My Orders
           </button>
           <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
             Profile
-          </button>
-          <button onClick={() => navigate('/catalog')}>
-            Browse Catalog
           </button>
           <button onClick={() => navigate('/blood-bank')}>
             Blood Bank
@@ -75,8 +75,8 @@ const UserDashboard: React.FC = () => {
             <div className="quick-actions">
               <h2>Quick Actions</h2>
               <div className="action-buttons">
-                <button className="action-btn" onClick={() => navigate('/catalog')}>
-                  🛒 Order Medicines
+                <button className="action-btn" onClick={() => setActiveTab('medicines')}>
+                  🛒 Book Medicines
                 </button>
                 <button className="action-btn" onClick={() => navigate('/blood-bank')}>
                   🩸 Request Blood
@@ -89,7 +89,58 @@ const UserDashboard: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'orders' && (
+        {activeTab === 'medicines' && (
+          <div className="medicines-view">
+            <h1>Book Medicines</h1>
+            <p className="section-info">Browse and book medicines. Your orders will be reviewed by admin.</p>
+            <div className="medicines-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px', marginTop: '20px' }}>
+              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+                <h3>Paracetamol</h3>
+                <p><strong>Price:</strong> ₹25.00</p>
+                <p><strong>Category:</strong> Pain Relief</p>
+                <p><strong>Description:</strong> Pain relief and fever reducer</p>
+                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
+              </div>
+              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+                <h3>Amoxicillin</h3>
+                <p><strong>Price:</strong> ₹120.00</p>
+                <p><strong>Category:</strong> Antibiotics</p>
+                <p><strong>Description:</strong> Antibiotic for bacterial infections</p>
+                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
+              </div>
+              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+                <h3>Cetirizine</h3>
+                <p><strong>Price:</strong> ₹45.00</p>
+                <p><strong>Category:</strong> Allergy</p>
+                <p><strong>Description:</strong> Antihistamine for allergies</p>
+                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
+              </div>
+              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+                <h3>Omeprazole</h3>
+                <p><strong>Price:</strong> ₹80.00</p>
+                <p><strong>Category:</strong> Digestive</p>
+                <p><strong>Description:</strong> Acid reflux and heartburn relief</p>
+                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
+              </div>
+              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+                <h3>Aspirin</h3>
+                <p><strong>Price:</strong> ₹30.00</p>
+                <p><strong>Category:</strong> Pain Relief</p>
+                <p><strong>Description:</strong> Pain relief and blood thinner</p>
+                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
+              </div>
+              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+                <h3>Metformin</h3>
+                <p><strong>Price:</strong> ₹150.00</p>
+                <p><strong>Category:</strong> Diabetes</p>
+                <p><strong>Description:</strong> Diabetes medication</p>
+                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        
           <div className="orders-view">
             <h1>My Orders</h1>
             <table>
