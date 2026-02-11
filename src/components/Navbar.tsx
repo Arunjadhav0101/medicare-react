@@ -15,7 +15,6 @@ const Navbar: React.FC = () => {
         
         <ul className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
           <li><Link to="/">Home</Link></li>
-          <li><Link to="/blood-bank">Blood Bank</Link></li>
           <li><Link to="/catalog">Catalog</Link></li>
           <li><Link to="/orders">My Orders</Link></li>
           <li><Link to="/login" className="btn-login">Login</Link></li>

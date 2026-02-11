@@ -78,11 +78,6 @@ const Home: React.FC = () => {
               <h3>Quick Service</h3>
               <p>Fast ordering process with instant confirmation</p>
             </div>
-            <div className="feature-card">
-              <div className="feature-icon">🩸</div>
-              <h3>Blood Bank</h3>
-              <p>Complete blood donation and request management system</p>
-            </div>
             <div className="feature-card" onClick={openChatbot} style={{ cursor: 'pointer' }}>
               <div className="feature-icon">🤖</div>
               <h3>AI Chatbot</h3>
