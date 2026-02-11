@@ -16,6 +16,12 @@ const Chatbot: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const handleOpenChatbot = () => setIsOpen(true);
+    window.addEventListener('openChatbot', handleOpenChatbot);
+    return () => window.removeEventListener('openChatbot', handleOpenChatbot);
+  }, []);
+
+  useEffect(() => {
     // Initial welcome message
     if (messages.length === 0) {
       setMessages([{

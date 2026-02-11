@@ -22,6 +22,10 @@ const Home: React.FC = () => {
       setContactInfo(JSON.parse(saved));
     }
   }, []);
+
+  const openChatbot = () => {
+    window.dispatchEvent(new Event('openChatbot'));
+  };
   return (
     <div className="home">
       <section className="hero"  style={{
@@ -52,7 +56,7 @@ const Home: React.FC = () => {
               <h3>Fast Delivery</h3>
               <p>Quick & reliable</p>
             </div>
-            <div className="hero-card">
+            <div className="hero-card" onClick={openChatbot} style={{ cursor: 'pointer' }}>
               <div className="card-icon">💬</div>
               <h3>AI Assistant</h3>
               <p>Smart recommendations</p>
@@ -80,7 +84,7 @@ const Home: React.FC = () => {
               <h3>Blood Bank</h3>
               <p>Complete blood donation and request management system</p>
             </div>
-            <div className="feature-card">
+            <div className="feature-card" onClick={openChatbot} style={{ cursor: 'pointer' }}>
               <div className="feature-icon">🤖</div>
               <h3>AI Chatbot</h3>
               <p>Intelligent assistant for medicine ordering and queries</p>
