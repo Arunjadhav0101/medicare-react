@@ -1,5 +1,8 @@
-# MediCare React - Online Pharmacy & Blood Bank System
+# 🏥 MediCare - Online Pharmacy System
 
+> **Manual Setup Guide**: See [MANUAL_SETUP.md](./MANUAL_SETUP.md) for instructions on how to run without Docker.
+
+## Project Overview
 A modern React TypeScript application converted from the original PHP-based MediCare system. This application provides comprehensive healthcare services including online pharmacy and blood bank management.
 
 ## 🚀 Features
