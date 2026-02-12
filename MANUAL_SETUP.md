@@ -96,9 +96,20 @@ A `start_app.bat` file is provided in the root directory. Double-click it to sta
 
 **Note:** Ensure your MySQL server is running before starting the app.
 
+### One-Click Start (With Docker Database)
+
+If you have Docker installed and want to use it for the database while running the app manually:
+
+1.  Make sure Docker Desktop is running.
+2.  Double-click `start_app_with_docker.bat` (this will start the MySQL container and then launch the app).
+
+---
+
 ## 6. Database Access Information
 
 - **Database Name**: `medicare`
+- **User**: `medicare_user`
+- **Password**: `medicare_password`
 - **Tables**:
     - `users`: Registered users and admins.
     - `medicines`: Product catalog.
