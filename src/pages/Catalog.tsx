@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Medicine } from '../types';
-import { getMedicines, saveMedicines } from '../data/medicines';
+import { medicineAPI } from '../services/api';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import './Catalog.css';
 
 const Catalog: React.FC = () => {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [cart, setCart] = useState<{[key: number]: number}>({});
+
+  const { addToCart, cartItems } = useCart();
+  const { user } = useAuth(); // If we want to show admin features conditionally
+
+  // Calculate cart quantities map for UI
+  const cartQuantities = cartItems.reduce((acc, item) => {
+    // Handle both potential item structures
+    const id = item.id || (item.medicine ? item.medicine.id : 0);
+    acc[id] = item.quantity;
+    return acc;
+  }, {} as { [key: number]: number });
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMedicine, setNewMedicine] = useState({
     name: '',
@@ -18,7 +32,17 @@ const Catalog: React.FC = () => {
   });
 
   useEffect(() => {
-    setMedicines(getMedicines());
+    const fetchMedicines = async () => {
+      try {
+        const res = await medicineAPI.getAll();
+        setMedicines(res.data);
+      } catch (error) {
+        console.error("Error fetching medicines:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMedicines();
   }, []);
 
   const categories = ['all', ...Array.from(new Set(medicines.map(m => m.category)))];
@@ -29,32 +53,33 @@ const Catalog: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const addToCart = (medicineId: number) => {
-    setCart(prev => ({
-      ...prev,
-      [medicineId]: (prev[medicineId] || 0) + 1
-    }));
+  const handleAddToCart = (medicine: Medicine) => {
+    addToCart(medicine);
   };
 
-  const removeMedicine = (id: number) => {
+  const removeMedicine = async (id: number) => {
     if (window.confirm('Are you sure you want to remove this medicine?')) {
-      const updated = medicines.filter(m => m.id !== id);
-      setMedicines(updated);
-      saveMedicines(updated);
+      try {
+        await medicineAPI.delete(id);
+        setMedicines(medicines.filter(m => m.id !== id));
+      } catch (error) {
+        console.error("Error deleting medicine:", error);
+        alert("Failed to delete medicine");
+      }
     }
   };
 
-  const handleAddMedicine = () => {
+  const handleAddMedicine = async () => {
     if (newMedicine.name && newMedicine.price && newMedicine.category) {
-      const medicine: Medicine = {
-        id: Math.max(...medicines.map(m => m.id), 0) + 1,
-        ...newMedicine
-      };
-      const updated = [...medicines, medicine];
-      setMedicines(updated);
-      saveMedicines(updated);
-      setNewMedicine({ name: '', price: 0, description: '', category: '', stock: 0 });
-      setShowAddForm(false);
+      try {
+        const res = await medicineAPI.create(newMedicine);
+        setMedicines([...medicines, res.data]);
+        setNewMedicine({ name: '', price: 0, description: '', category: '', stock: 0 });
+        setShowAddForm(false);
+      } catch (error) {
+        console.error("Error adding medicine:", error);
+        alert("Failed to add medicine");
+      }
     }
   };
 
@@ -64,9 +89,11 @@ const Catalog: React.FC = () => {
         <div className="catalog-header">
           <h1>Medicine Catalog</h1>
           <p>Find the medicines you need with our comprehensive catalog</p>
-          <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
-            {showAddForm ? 'Cancel' : '+ Add New Medicine'}
-          </button>
+          {user?.role === 'Admin' && (
+            <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
+              {showAddForm ? 'Cancel' : '+ Add New Medicine'}
+            </button>
+          )}
         </div>
 
         {showAddForm && (
@@ -115,7 +142,7 @@ const Catalog: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <div className="category-filter">
             <select
               value={selectedCategory}
@@ -145,19 +172,21 @@ const Catalog: React.FC = () => {
               <div className="medicine-actions">
                 <button
                   className="btn btn-primary"
-                  onClick={() => addToCart(medicine.id)}
+                  onClick={() => handleAddToCart(medicine)}
                   disabled={medicine.stock === 0}
                 >
                   {medicine.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                 </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => removeMedicine(medicine.id)}
-                >
-                  Remove
-                </button>
-                {cart[medicine.id] && (
-                  <span className="cart-quantity">In cart: {cart[medicine.id]}</span>
+                {user?.role === 'Admin' && (
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => removeMedicine(medicine.id)}
+                  >
+                    Remove
+                  </button>
+                )}
+                {cartQuantities[medicine.id] && (
+                  <span className="cart-quantity">In cart: {cartQuantities[medicine.id]}</span>
                 )}
               </div>
             </div>

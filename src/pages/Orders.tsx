@@ -1,51 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { orderAPI } from '../services/api';
+import { Order } from '../types';
+import { useAuth } from '../context/AuthContext';
 import './Orders.css';
 
-interface Order {
-  id: number;
-  date: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered';
-  total: number;
-  items: Array<{
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
-}
-
 const Orders: React.FC = () => {
-  const [orders] = useState<Order[]>([
-    {
-      id: 1001,
-      date: '2024-02-01',
-      status: 'delivered',
-      total: 195,
-      items: [
-        { name: 'Paracetamol', quantity: 2, price: 25 },
-        { name: 'Cetirizine', quantity: 1, price: 45 },
-        { name: 'Amoxicillin', quantity: 1, price: 120 }
-      ]
-    },
-    {
-      id: 1002,
-      date: '2024-02-02',
-      status: 'shipped',
-      total: 80,
-      items: [
-        { name: 'Omeprazole', quantity: 1, price: 80 }
-      ]
-    },
-    {
-      id: 1003,
-      date: '2024-02-02',
-      status: 'processing',
-      total: 180,
-      items: [
-        { name: 'Metformin', quantity: 1, price: 150 },
-        { name: 'Aspirin', quantity: 1, price: 30 }
-      ]
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
     }
-  ]);
+
+    const fetchOrders = async () => {
+      try {
+        const res = await orderAPI.getOrders();
+        setOrders(res.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [isAuthenticated, navigate]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -66,6 +50,8 @@ const Orders: React.FC = () => {
       default: return status;
     }
   };
+
+  if (loading) return <div className="loading">Loading orders...</div>;
 
   return (
     <div className="orders-page">
@@ -89,10 +75,10 @@ const Orders: React.FC = () => {
                 <div className="order-header">
                   <div className="order-info">
                     <h3>Order #{order.id}</h3>
-                    <p>Placed on {new Date(order.date).toLocaleDateString()}</p>
+                    <p>Placed on {new Date(order.createdAt || Date.now()).toLocaleDateString()}</p>
                   </div>
                   <div className="order-status">
-                    <span 
+                    <span
                       className="status-badge"
                       style={{ backgroundColor: getStatusColor(order.status) }}
                     >
@@ -102,13 +88,13 @@ const Orders: React.FC = () => {
                 </div>
 
                 <div className="order-items">
-                  {order.items.map((item, index) => (
+                  {order.items?.map((item, index) => (
                     <div key={index} className="order-item">
                       <div className="item-details">
-                        <span className="item-name">{item.name}</span>
+                        <span className="item-name">{item.medicine?.name || 'Medicine'}</span>
                         <span className="item-quantity">Qty: {item.quantity}</span>
                       </div>
-                      <div className="item-price">₹{item.price * item.quantity}</div>
+                      <div className="item-price">₹{(item.medicine?.price || 0) * item.quantity}</div>
                     </div>
                   ))}
                 </div>

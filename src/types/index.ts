@@ -10,8 +10,11 @@ export interface Medicine {
 
 export interface CartItem {
   id: number;
-  medicine: Medicine;
+  medicine?: Medicine;
   quantity: number;
+  price?: number;
+  name?: string;
+  image?: string;
 }
 
 export interface User {
@@ -19,6 +22,8 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  role: string;
+  status: string;
 }
 
 export interface Order {

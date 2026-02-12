@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 const Signup: React.FC = () => {
@@ -13,39 +14,36 @@ const Signup: React.FC = () => {
     role: 'user'
   });
 
+  const { register, error: authError, clearError } = useAuth();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (authError) clearError();
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       alert('Passwords do not match');
       return;
     }
-    
-    console.log('Signup attempt:', formData);
-    
-    // Save user to localStorage
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const newUser = {
-      id: existingUsers.length + 1,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      role: formData.role === 'admin' ? 'Admin' : 'User',
-      status: 'Active'
-    };
-    existingUsers.push(newUser);
-    localStorage.setItem('users', JSON.stringify(existingUsers));
-    
-    if (formData.role === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/user-dashboard');
+
+    try {
+      // Remove confirmPassword from data sent to API
+      const { confirmPassword, ...registerData } = formData;
+
+      await register(registerData);
+
+      // After successful registration, redirect to login
+      alert('Registration successful! Please login.');
+      navigate('/login');
+
+    } catch (err) {
+      console.error("Signup failed", err);
+      // Error handled by AuthContext display
     }
   };
 
@@ -56,8 +54,9 @@ const Signup: React.FC = () => {
           <div className="auth-header">
             <h2>Create Account</h2>
             <p>Join MediCare for better healthcare</p>
+            {authError && <div className="error-message" style={{ color: 'red', marginTop: '10px' }}>{authError}</div>}
           </div>
-          
+
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
               <label htmlFor="role">Register As</label>
@@ -84,7 +83,7 @@ const Signup: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
               <input
@@ -96,7 +95,7 @@ const Signup: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="phone">Phone Number</label>
               <input
@@ -108,7 +107,7 @@ const Signup: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="password">Password</label>
               <input
@@ -120,7 +119,7 @@ const Signup: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="confirmPassword">Confirm Password</label>
               <input
@@ -132,12 +131,12 @@ const Signup: React.FC = () => {
                 required
               />
             </div>
-            
+
             <button type="submit" className="btn btn-primary auth-btn">
               Create Account
             </button>
           </form>
-          
+
           <div className="auth-footer">
             <p>Already have an account? <Link to="/login">Sign in here</Link></p>
           </div>

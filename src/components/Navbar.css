@@ -50,6 +50,28 @@
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: #ff4d4f;
+  color: white;
+}
+
+.user-greeting {
+  color: #333;
+  font-weight: 500;
 }
 
 .btn-login {

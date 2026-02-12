@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getMedicines, saveMedicines } from '../data/medicines';
+import { userAPI, medicineAPI, orderAPI } from '../services/api';
+import { User, Medicine } from '../types';
 import './AdminPanel.css';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  phone?: string;
-}
+
 
 interface BloodDonor {
   id: number;
@@ -36,32 +30,70 @@ interface BloodRequest {
   urgency?: string;
 }
 
-interface Medicine {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  stock: number;
-}
+
 
 const AdminPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  
+
   // Load users from localStorage or use default
-  const loadUsers = (): User[] => {
-    const savedUsers = localStorage.getItem('users');
-    if (savedUsers) {
-      return JSON.parse(savedUsers);
+  /* Removed loadUsers function */
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Stats state
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    pendingOrders: 0
+  });
+
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+
+  const fetchDashboardData = async () => {
+    setLoading(true); // Added setLoading(true) here as it was in the original fetchData
+    try {
+      const [usersRes, medicinesRes, ordersRes] = await Promise.all([
+        userAPI.getAll(),
+        medicineAPI.getAll(),
+        orderAPI.getOrders()
+      ]);
+
+      setUsers(usersRes.data);
+      setMedicines(medicinesRes.data);
+
+      const orders = ordersRes.data;
+      const revenue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+      const pending = orders.filter(o => o.status === 'pending').length;
+
+      setStats({
+        totalUsers: usersRes.data.length,
+        totalOrders: orders.length,
+        totalRevenue: revenue,
+        pendingOrders: pending
+      });
+
+      // Format recent orders for display
+      const formattedRecent = orders.slice(0, 5).map(order => ({
+        id: order.id,
+        user: order.userId, // In a real app we'd map this to a name
+        amount: order.total,
+        status: order.status,
+        date: new Date(order.createdAt || Date.now()).toLocaleDateString()
+      }));
+      setRecentOrders(formattedRecent);
+
+    } catch (error) {
+      console.error("Error loading dashboard:", error);
+    } finally {
+      setLoading(false);
     }
-    return [
-      { id: 1, name: 'Rahul Verma', email: 'rahul@example.com', role: 'User', status: 'Active' },
-      { id: 2, name: 'Anjali Desai', email: 'anjali@example.com', role: 'User', status: 'Active' },
-      { id: 3, name: 'Arjun Mehta', email: 'arjun@example.com', role: 'Admin', status: 'Active' }
-    ];
   };
-  
-  const [users, setUsers] = useState<User[]>(loadUsers());
+
+  React.useEffect(() => {
+    fetchDashboardData();
+  }, []);
   const [showAddUser, setShowAddUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'User', status: 'Active' });
@@ -80,20 +112,9 @@ const AdminPanel: React.FC = () => {
     ];
   });
 
-  const stats = {
-    totalUsers: users.length,
-    totalOrders: 3420,
-    totalRevenue: 125000,
-    pendingOrders: 45
-  };
 
-  const recentOrders = [
-    { id: 'ORD001', user: 'Amit Patel', amount: 450, status: 'Pending', date: '2026-02-10' },
-    { id: 'ORD002', user: 'Sneha Reddy', amount: 320, status: 'Completed', date: '2026-02-10' },
-    { id: 'ORD003', user: 'Vikram Singh', amount: 680, status: 'Processing', date: '2026-02-09' }
-  ];
 
-  const [medicines, setMedicines] = useState<Medicine[]>(getMedicines());
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null);
   const [showAddMedicine, setShowAddMedicine] = useState(false);
   const [newMedicine, setNewMedicine] = useState({ name: '', price: 0, description: '', category: '', stock: 0 });
@@ -134,25 +155,29 @@ const AdminPanel: React.FC = () => {
     localStorage.setItem('bloodRequests', JSON.stringify(updated));
   };
 
-  const handleAddMedicine = () => {
+  const handleAddMedicine = async () => {
     if (newMedicine.name && newMedicine.price && newMedicine.category) {
-      const medicine: Medicine = {
-        id: Math.max(...medicines.map(m => m.id), 0) + 1,
-        ...newMedicine
-      };
-      const updated = [...medicines, medicine];
-      setMedicines(updated);
-      saveMedicines(updated);
-      setNewMedicine({ name: '', price: 0, description: '', category: '', stock: 0 });
-      setShowAddMedicine(false);
+      try {
+        const res = await medicineAPI.create(newMedicine);
+        setMedicines([...medicines, res.data]);
+        setNewMedicine({ name: '', price: 0, description: '', category: '', stock: 0 });
+        setShowAddMedicine(false);
+      } catch (error) {
+        console.error("Error adding medicine:", error);
+        alert("Failed to add medicine");
+      }
     }
   };
 
-  const handleDeleteMedicine = (id: number) => {
+  const handleDeleteMedicine = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this medicine?')) {
-      const updated = medicines.filter(m => m.id !== id);
-      setMedicines(updated);
-      saveMedicines(updated);
+      try {
+        await medicineAPI.delete(id);
+        setMedicines(medicines.filter(m => m.id !== id));
+      } catch (error) {
+        console.error("Error deleting medicine:", error);
+        alert("Failed to delete medicine");
+      }
     }
   };
 
@@ -160,12 +185,16 @@ const AdminPanel: React.FC = () => {
     setEditingMedicine({ ...medicine });
   };
 
-  const handleUpdateMedicine = () => {
+  const handleUpdateMedicine = async () => {
     if (editingMedicine) {
-      const updated = medicines.map(m => m.id === editingMedicine.id ? editingMedicine : m);
-      setMedicines(updated);
-      saveMedicines(updated);
-      setEditingMedicine(null);
+      try {
+        await medicineAPI.update(editingMedicine.id, editingMedicine);
+        setMedicines(medicines.map(m => m.id === editingMedicine.id ? editingMedicine : m));
+        setEditingMedicine(null);
+      } catch (error) {
+        console.error("Error updating medicine:", error);
+        alert("Failed to update medicine");
+      }
     }
   };
 
@@ -174,21 +203,35 @@ const AdminPanel: React.FC = () => {
     alert('Contact information updated successfully!');
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     if (newUser.name && newUser.email) {
-      const updatedUsers = [...users, { ...newUser, id: users.length + 1 }];
-      setUsers(updatedUsers);
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
-      setNewUser({ name: '', email: '', role: 'User', status: 'Active' });
-      setShowAddUser(false);
+      // Admin creating user usually implies generic password or handled via invite
+      // For now, we'll strip this or add a default password if backend requires it
+      // The backend register endpoint requires password.
+      const defaultPassword = "password123";
+      try {
+        await userAPI.register({ ...newUser, password: defaultPassword, phone: '0000000000' } as any);
+        // Refresh list
+        const res = await userAPI.getAll();
+        setUsers(res.data);
+        setNewUser({ name: '', email: '', role: 'User', status: 'Active' });
+        setShowAddUser(false);
+      } catch (error) {
+        console.error("Error adding user:", error);
+        alert("Failed to add user");
+      }
     }
   };
 
-  const handleDeleteUser = (id: number) => {
+  const handleDeleteUser = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      const updatedUsers = users.filter((user: User) => user.id !== id);
-      setUsers(updatedUsers);
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
+      try {
+        await userAPI.deleteUser(id.toString());
+        setUsers(users.filter((user: User) => user.id !== id));
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("Failed to delete user");
+      }
     }
   };
 
@@ -196,19 +239,23 @@ const AdminPanel: React.FC = () => {
     setEditingUser({ ...user });
   };
 
-  const handleUpdateUser = () => {
+  const handleUpdateUser = async () => {
     if (editingUser) {
-      const updatedUsers = users.map((user: User) => user.id === editingUser.id ? editingUser : user);
-      setUsers(updatedUsers);
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
-      setEditingUser(null);
+      try {
+        await userAPI.updateProfile(editingUser.id.toString(), editingUser);
+        setUsers(users.map((user: User) => user.id === editingUser.id ? editingUser : user));
+        setEditingUser(null);
+      } catch (error) {
+        console.error("Error updating user:", error);
+        alert("Failed to update user");
+      }
     }
   };
 
   return (
     <div className="admin-panel">
       <div className="admin-badge">Admin</div>
-      
+
       <div className="admin-sidebar">
         <h2>Admin Panel</h2>
         <nav className="admin-nav">
@@ -588,24 +635,24 @@ const AdminPanel: React.FC = () => {
               <h2>Contact Information</h2>
               <div className="form-group">
                 <label>Contact Phone</label>
-                <input 
-                  type="tel" 
-                  value={contactInfo.phone} 
+                <input
+                  type="tel"
+                  value={contactInfo.phone}
                   onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
                 />
               </div>
               <div className="form-group">
                 <label>Contact Email</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   value={contactInfo.email}
                   onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
                 />
               </div>
               <div className="form-group">
                 <label>Address</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={contactInfo.address}
                   onChange={(e) => setContactInfo({ ...contactInfo, address: e.target.value })}
                 />
