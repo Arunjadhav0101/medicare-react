@@ -22,11 +22,9 @@ const UserDashboard: React.FC = () => {
     email: user?.email || ''
   };
 
-  const [orders, setOrders] = useState<Order[]>([
-    { id: 'ORD001', items: 'Paracetamol, Bandage', amount: 80, status: 'Delivered', date: '2026-02-08' },
-    { id: 'ORD002', items: 'Thermometer', amount: 150, status: 'Processing', date: '2026-02-10' }
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [bloodRequests, setBloodRequests] = useState<any[]>([]);
+  const [medicines, setMedicines] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -38,9 +36,70 @@ const UserDashboard: React.FC = () => {
           console.error("Error fetching blood requests:", error);
         }
       };
+      const fetchOrders = async () => {
+        try {
+          const response = await fetch(`/api/orders/user/${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setOrders(data);
+          }
+        } catch (error) {
+          console.error("Error fetching orders:", error);
+        }
+      };
       fetchBloodRequests();
+      fetchOrders();
     }
   }, [user]);
+
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const response = await fetch('/api/medicines');
+        if (response.ok) {
+          const data = await response.json();
+          setMedicines(data);
+        }
+      } catch (error) {
+        console.error("Error fetching medicines:", error);
+      }
+    };
+    fetchMedicines();
+  }, []);
+
+  const handleBookMedicine = async (medicine: any) => {
+    if (!user) {
+      alert("Please login first to book medicines.");
+      return;
+    }
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          totalAmount: medicine.price,
+          items: [{ medicineId: medicine.id, quantity: 1, price: medicine.price }]
+        })
+      });
+      if (response.ok) {
+        alert("Medicine booked successfully!");
+        const ordersRes = await fetch(`/api/orders/user/${user.id}`);
+        if (ordersRes.ok) {
+          const data = await ordersRes.json();
+          setOrders(data);
+        }
+        setActiveTab('orders');
+      } else {
+        alert("Failed to book medicine.");
+      }
+    } catch (error) {
+      console.error("Error booking medicine:", error);
+      alert("Error booking medicine.");
+    }
+  };
 
   return (
     <div className="user-dashboard">
@@ -87,7 +146,7 @@ const UserDashboard: React.FC = () => {
               </div>
               <div className="stat-box">
                 <h3>Total Spent</h3>
-                <p className="stat-value">₹{orders.reduce((sum, o) => sum + o.amount, 0)}</p>
+                <p className="stat-value">₹{orders.reduce((sum, o) => sum + Number(o.amount || 0), 0).toFixed(2)}</p>
               </div>
             </div>
             <div className="quick-actions">
@@ -112,48 +171,15 @@ const UserDashboard: React.FC = () => {
             <h1>Book Medicines</h1>
             <p className="section-info">Browse and book medicines. Your orders will be reviewed by admin.</p>
             <div className="medicines-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '20px', marginTop: '20px' }}>
-              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-                <h3>Paracetamol</h3>
-                <p><strong>Price:</strong> ₹25.00</p>
-                <p><strong>Category:</strong> Pain Relief</p>
-                <p><strong>Description:</strong> Pain relief and fever reducer</p>
-                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
-              </div>
-              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-                <h3>Amoxicillin</h3>
-                <p><strong>Price:</strong> ₹120.00</p>
-                <p><strong>Category:</strong> Antibiotics</p>
-                <p><strong>Description:</strong> Antibiotic for bacterial infections</p>
-                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
-              </div>
-              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-                <h3>Cetirizine</h3>
-                <p><strong>Price:</strong> ₹45.00</p>
-                <p><strong>Category:</strong> Allergy</p>
-                <p><strong>Description:</strong> Antihistamine for allergies</p>
-                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
-              </div>
-              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-                <h3>Omeprazole</h3>
-                <p><strong>Price:</strong> ₹80.00</p>
-                <p><strong>Category:</strong> Digestive</p>
-                <p><strong>Description:</strong> Acid reflux and heartburn relief</p>
-                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
-              </div>
-              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-                <h3>Aspirin</h3>
-                <p><strong>Price:</strong> ₹30.00</p>
-                <p><strong>Category:</strong> Pain Relief</p>
-                <p><strong>Description:</strong> Pain relief and blood thinner</p>
-                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
-              </div>
-              <div className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
-                <h3>Metformin</h3>
-                <p><strong>Price:</strong> ₹150.00</p>
-                <p><strong>Category:</strong> Diabetes</p>
-                <p><strong>Description:</strong> Diabetes medication</p>
-                <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }}>Book Now</button>
-              </div>
+              {medicines.map(medicine => (
+                <div key={medicine.id} className="medicine-card" style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+                  <h3>{medicine.name}</h3>
+                  <p><strong>Price:</strong> ₹{medicine.price}</p>
+                  <p><strong>Category:</strong> {medicine.category}</p>
+                  <p><strong>Description:</strong> {medicine.description}</p>
+                  <button className="btn btn-primary" style={{ marginTop: '10px', width: '100%' }} onClick={() => handleBookMedicine(medicine)}>Book Now</button>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -172,17 +198,17 @@ const UserDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {orders.map(order => (
-                  <tr key={order.id}>
-                    <td>{order.id}</td>
+                {orders.map((order, index) => (
+                  <tr key={order.id || index}>
+                    <td>ORD{String(order.id).padStart(3, '0')}</td>
                     <td>{order.items}</td>
                     <td>₹{order.amount}</td>
                     <td>
-                      <span className={`status ${order.status.toLowerCase()}`}>
-                        {order.status}
+                      <span className={`status ${(order.status || 'Pending').toLowerCase()}`}>
+                        {order.status || 'Pending'}
                       </span>
                     </td>
-                    <td>{order.date}</td>
+                    <td>{order.date ? new Date(order.date).toLocaleDateString() : 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>

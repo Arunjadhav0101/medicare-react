@@ -40,7 +40,6 @@ const AdminPanel: React.FC = () => {
   /* Removed loadUsers function */
 
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Stats state
   const [stats, setStats] = useState({
@@ -51,9 +50,39 @@ const AdminPanel: React.FC = () => {
   });
 
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [viewingOrder, setViewingOrder] = useState<any>(null);
+
+  const handleApproveOrder = async (id: number) => {
+    try {
+      await orderAPI.updateOrderStatus(id, 'Processing');
+      setRecentOrders(recentOrders.map(o => o.id === id ? { ...o, status: 'Processing' } : o));
+    } catch (error) {
+      console.error("Error approving order:", error);
+      alert("Failed to approve order");
+    }
+  };
+
+  const handleRejectOrder = async (id: number) => {
+    try {
+      await orderAPI.updateOrderStatus(id, 'Rejected');
+      setRecentOrders(recentOrders.map(o => o.id === id ? { ...o, status: 'Rejected' } : o));
+    } catch (error) {
+      console.error("Error rejecting order:", error);
+      alert("Failed to reject order");
+    }
+  };
+
+  const handleViewOrder = async (id: number) => {
+    try {
+      const res = await orderAPI.getOrderById(id);
+      setViewingOrder(res.data);
+    } catch (error) {
+      console.error("Error viewing order:", error);
+      alert("Failed to fetch order details");
+    }
+  };
 
   const fetchDashboardData = async () => {
-    setLoading(true); // Added setLoading(true) here as it was in the original fetchData
     try {
       const [usersRes, medicinesRes, ordersRes] = await Promise.all([
         userAPI.getAll(),
@@ -64,9 +93,9 @@ const AdminPanel: React.FC = () => {
       setUsers(usersRes.data);
       setMedicines(medicinesRes.data);
 
-      const orders = ordersRes.data;
-      const revenue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
-      const pending = orders.filter(o => o.status === 'pending').length;
+      const orders = ordersRes.data as any[];
+      const revenue = orders.reduce((sum, order: any) => sum + (Number(order.total_amount) || 0), 0);
+      const pending = orders.filter(o => o.status === 'pending' || o.status === 'Pending').length;
 
       setStats({
         totalUsers: usersRes.data.length,
@@ -75,20 +104,18 @@ const AdminPanel: React.FC = () => {
         pendingOrders: pending
       });
 
-      // Format recent orders for display
-      const formattedRecent = orders.slice(0, 5).map(order => ({
+      // Format all orders for display
+      const formattedOrders = orders.map((order: any) => ({
         id: order.id,
-        user: order.userId, // In a real app we'd map this to a name
-        amount: order.total,
-        status: order.status,
-        date: new Date(order.createdAt || Date.now()).toLocaleDateString()
+        user: order.user_name || order.user_email || `User ID: ${order.user_id}`,
+        amount: order.total_amount,
+        status: order.status || 'Pending',
+        date: new Date(order.created_at || Date.now()).toLocaleDateString()
       }));
-      setRecentOrders(formattedRecent);
+      setRecentOrders(formattedOrders);
 
     } catch (error) {
       console.error("Error loading dashboard:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -366,12 +393,12 @@ const AdminPanel: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {recentOrders.map(order => (
+                  {recentOrders.slice(0, 5).map(order => (
                     <tr key={order.id}>
                       <td>{order.id}</td>
                       <td>{order.user}</td>
                       <td>₹{order.amount}</td>
-                      <td><span className={`status ${order.status.toLowerCase()}`}>{order.status}</span></td>
+                      <td><span className={`status ${(order.status || 'pending').toLowerCase()}`}>{order.status}</span></td>
                       <td>{order.date}</td>
                     </tr>
                   ))}
@@ -495,11 +522,16 @@ const AdminPanel: React.FC = () => {
                     <td>{order.id}</td>
                     <td>{order.user}</td>
                     <td>₹{order.amount}</td>
-                    <td><span className={`status ${order.status.toLowerCase()}`}>{order.status}</span></td>
+                    <td><span className={`status ${(order.status || 'pending').toLowerCase()}`}>{order.status}</span></td>
                     <td>{order.date}</td>
                     <td>
-                      <button className="btn-small">View</button>
-                      <button className="btn-small">Update</button>
+                      <button className="btn-small" onClick={() => handleViewOrder(order.id)}>View</button>
+                      {(order.status === 'Pending' || order.status === 'pending') && (
+                        <>
+                          <button className="btn-small" style={{ marginLeft: '5px' }} onClick={() => handleApproveOrder(order.id)}>Approve</button>
+                          <button className="btn-small btn-danger" style={{ marginLeft: '5px' }} onClick={() => handleRejectOrder(order.id)}>Reject</button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -596,6 +628,22 @@ const AdminPanel: React.FC = () => {
               <div className="blood-card">
                 <h3>AB+</h3>
                 <p>15 Units</p>
+              </div>
+              <div className="blood-card">
+                <h3>O-</h3>
+                <p>12 Units</p>
+              </div>
+              <div className="blood-card">
+                <h3>A-</h3>
+                <p>8 Units</p>
+              </div>
+              <div className="blood-card">
+                <h3>B-</h3>
+                <p>5 Units</p>
+              </div>
+              <div className="blood-card">
+                <h3>AB-</h3>
+                <p>3 Units</p>
               </div>
             </div>
 
@@ -709,6 +757,28 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               <button className="btn btn-primary" onClick={handleSaveContactInfo}>Save Contact Info</button>
+            </div>
+          </div>
+        )}
+
+        {viewingOrder && (
+          <div className="edit-user-modal">
+            <div className="modal-content">
+              <h3>Order Details (ID: {viewingOrder.id})</h3>
+              <p><strong>User:</strong> {viewingOrder.user_name} ({viewingOrder.user_email})</p>
+              <p><strong>Status:</strong> {viewingOrder.status}</p>
+              <p><strong>Total Amount:</strong> ₹{viewingOrder.amount}</p>
+              <h4>Items:</h4>
+              <ul style={{ textAlign: 'left', marginBottom: '15px' }}>
+                {viewingOrder.items?.map((item: any, idx: number) => (
+                  <li key={idx}>
+                    {item.quantity}x {item.medicineName} ({item.category}) - ₹{item.price} each
+                  </li>
+                ))}
+              </ul>
+              <div className="modal-actions">
+                <button className="btn-small" onClick={() => setViewingOrder(null)}>Close</button>
+              </div>
             </div>
           </div>
         )}

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   total_amount DECIMAL(10, 2) NOT NULL,
-  status ENUM('Pending', 'Processing', 'Completed', 'Delivered') DEFAULT 'Pending',
+  status ENUM('Pending', 'Processing', 'Completed', 'Delivered', 'Rejected') DEFAULT 'Pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS blood_donors (
 -- Blood Requests table
 CREATE TABLE IF NOT EXISTS blood_requests (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
   patient_name VARCHAR(255) NOT NULL,
   blood_group VARCHAR(5) NOT NULL,
   units_needed INT NOT NULL,
@@ -81,7 +82,8 @@ CREATE TABLE IF NOT EXISTS blood_requests (
   hospital_name VARCHAR(255) NOT NULL,
   contact_phone VARCHAR(20) NOT NULL,
   status ENUM('Pending', 'Approved', 'Fulfilled', 'Rejected') DEFAULT 'Pending',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Insert sample medicines
