@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChatWidget } from "@doclessai/sdk";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -10,7 +11,7 @@ import BloodBank from './pages/BloodBank';
 import Orders from './pages/Orders';
 import AdminPanel from './pages/AdminPanel';
 import UserDashboard from './pages/UserDashboard';
-import Chatbot from './components/Chatbot';
+// import Chatbot from './components/Chatbot';
 import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
@@ -34,7 +35,9 @@ function App() {
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/user-dashboard" element={<UserDashboard />} />
             </Routes>
-            <Chatbot />
+            {/* <Chatbot /> */}
+            <ChatWidget appKey="doclessai_live_9e40e0f6263c142bd0fe134d35e46d495143a04791874b36d44612072637a716" name="Medicare-Assistant" />
+
           </div>
         </CartProvider>
       </AuthProvider>
